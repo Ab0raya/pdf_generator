@@ -1,148 +1,201 @@
 import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart';
-import 'dart:io';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter/services.dart' show rootBundle;
 
-import '../../../models/invoice.dart';
+Future<Uint8List> makePdf() async {
+  final pdf = pw.Document(
+    title: 'how who',
 
-Future<Uint8List> makePdf(Invoice invoice) async {
-  final pdf = Document();
-  final imageLogo = MemoryImage((await rootBundle.load('assets/technical_logo.png')).buffer.asUint8List());
+  );
+
+  final fontData = await rootBundle.load('assets/Cairo.ttf');
+  final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+  const PdfColor bg = PdfColor.fromInt(0xff161616);
+  const PdfColor green = PdfColor.fromInt(0xffD2F446);
+
   pdf.addPage(
-    Page(
-      build: (context) {
-        return Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  children: [
-                    Text("Attention to: ${invoice.customer}"),
-                    Text(invoice.address),
-                  ],
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                ),
-                SizedBox(
-                  height: 150,
-                  width: 150,
-                  child: Image(imageLogo),
-                )
-              ],
-            ),
-            Container(height: 50),
-            Table(
-              border: TableBorder.all(color: PdfColors.black),
-              children: [
-                TableRow(
-                  children: [
-                    Padding(
-                      child: Text(
-                        'INVOICE FOR PAYMENT',
-                        style: Theme.of(context).header4,
-                        textAlign: TextAlign.center,
-                      ),
-                      padding: EdgeInsets.all(20),
-                    ),
-                  ],
-                ),
-                ...invoice.items.map(
-                      (e) => TableRow(
-                    children: [
-                      Expanded(
-                        child: PaddedText(e.description),
-                        flex: 2,
-                      ),
-                      Expanded(
-                        child: PaddedText("\$${e.cost}"),
-                        flex: 1,
-                      )
-                    ],
+    pw.Page(
+      pageTheme: pw.PageTheme(
+        theme: pw.ThemeData(
+          defaultTextStyle: const pw.TextStyle(color: PdfColors.white),
+        ),
+        buildBackground: (pw.Context context) {
+          return pw.FullPage(
+            ignoreMargins: true,
+            child: pw.Container(
+              decoration: const pw.BoxDecoration(
+                color: bg,
+                border: pw.Border.fromBorderSide(
+                  pw.BorderSide(
+                    color: green,
+                    width: 10,
                   ),
                 ),
-                TableRow(
-                  children: [
-                    PaddedText('TAX', align: TextAlign.right),
-                    PaddedText('\$${(invoice.totalCost() * 0.1).toStringAsFixed(2)}'),
-                  ],
-                ),
-                TableRow(
-                  children: [PaddedText('TOTAL', align: TextAlign.right), PaddedText('\$${(invoice.totalCost() * 1.1).toStringAsFixed(2)}')],
-                )
-              ],
-            ),
-            Padding(
-              child: Text(
-                "THANK YOU FOR YOUR CUSTOM!",
-                style: Theme.of(context).header2,
               ),
-              padding: EdgeInsets.all(20),
             ),
-            Text("Please forward the below slip to your accounts payable department."),
-            Divider(
-              height: 1,
-              borderStyle: BorderStyle.dashed,
+          );
+        },
+      ),
+      build: (context) {
+        return pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            pw.Center(
+              child: pw.Text(
+                "عبدالفتاج المكسيكي",
+                style: pw.TextStyle(
+                  font: ttf,
+                  fontSize: 40,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+                textDirection: pw.TextDirection.rtl,
+              ),
             ),
-            Container(height: 50),
-            Table(
-              border: TableBorder.all(color: PdfColors.black),
+            pw.Center(
+              child: pw.Text(
+                "العاصمة الإدارية",
+                style: pw.TextStyle(
+                  font: ttf,
+                  fontSize: 32,
+                  fontWeight: pw.FontWeight.bold,
+                  color: green,
+                ),
+                textDirection: pw.TextDirection.rtl,
+              ),
+            ),
+            pw.SizedBox(height: 50),
+            pw.Table(
+              border: pw.TableBorder.all(color: green),
+              columnWidths: {
+                0: const pw.FlexColumnWidth(3),
+                1: const pw.FlexColumnWidth(3),
+                2: const pw.FlexColumnWidth(5),
+              },
               children: [
-                TableRow(
+                pw.TableRow(
+                  decoration: pw.BoxDecoration(color: green),
                   children: [
-                    PaddedText('Account Number'),
-                    PaddedText(
-                      '1234 1234',
-                    )
+                    pw.Center(
+                      child: pw.Text(
+                        "الوصف",
+                        style: pw.TextStyle(
+                          font: ttf,
+                          fontSize: 16,
+                          fontWeight: pw.FontWeight.bold,
+                          color: bg,
+                        ),
+                        textDirection: pw.TextDirection.rtl,
+                      ),
+                    ),
+                    pw.Center(
+                      child: pw.Text(
+                        "السعر",
+                        style: pw.TextStyle(
+                          font: ttf,
+                          fontSize: 16,
+                          fontWeight: pw.FontWeight.bold,
+                          color: bg,
+                        ),
+                        textDirection: pw.TextDirection.rtl,
+                      ),
+                    ),
+                    pw.Center(
+                      child: pw.Text(
+                        "الخدمة",
+                        style: pw.TextStyle(
+                          font: ttf,
+                          fontSize: 16,
+                          fontWeight: pw.FontWeight.bold,
+                          color: bg,
+                        ),
+                        textDirection: pw.TextDirection.rtl,
+                      ),
+                    ),
                   ],
                 ),
-                TableRow(
+                pw.TableRow(
                   children: [
-                    PaddedText(
-                      'Account Name',
+                    pw.Center(
+                      child: pw.Text(
+                        "Data 1",
+                        style: pw.TextStyle(font: ttf, fontSize: 14),
+                      ),
                     ),
-                    PaddedText(
-                      'ADAM FAMILY TRUST',
-                    )
+                    pw.Center(
+                      child: pw.Text(
+                        "Data 3",
+                        style: pw.TextStyle(font: ttf, fontSize: 14),
+                      ),
+                    ),
+                    pw.Center(
+                      child: pw.Text(
+                        "Data 2",
+                        style: pw.TextStyle(font: ttf, fontSize: 14),
+                      ),
+                    ),
                   ],
                 ),
-                TableRow(
-                  children: [
-                    PaddedText(
-                      'Total Amount to be Paid',
-                    ),
-                    PaddedText('\$${(invoice.totalCost() * 1.1).toStringAsFixed(2)}')
-                  ],
-                )
               ],
             ),
-            Padding(
-              padding: EdgeInsets.all(30),
-              child: Text(
-                'Please ensure all cheques are payable to the ADAM FAMILY TRUST.',
-                style: Theme.of(context).header3.copyWith(
-                  fontStyle: FontStyle.italic,
+            pw.Spacer(),
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Column(
+                  children: [
+                    pw.Text(
+                      "المجموع",
+                      style: pw.TextStyle(
+                        font: ttf,
+                        fontSize: 30,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                    pw.Text(
+                      "2200",
+                      style: pw.TextStyle(
+                        font: ttf,
+                        fontSize: 28,
+                        fontWeight: pw.FontWeight.bold,
+                        color: green,
+                      ),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                  ],
                 ),
-                textAlign: TextAlign.center,
-              ),
-            )
+                pw.Column(
+                  children: [
+                    pw.Text(
+                      "الحاج سيد",
+                      style: pw.TextStyle(
+                        font: ttf,
+                        fontSize: 30,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                    pw.Text(
+                      "22-10-2024",
+                      style: pw.TextStyle(
+                        font: ttf,
+                        fontSize: 28,
+                        fontWeight: pw.FontWeight.bold,
+                        color: green,
+                      ),
+                      textDirection: pw.TextDirection.rtl,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ],
         );
       },
     ),
   );
+
   return pdf.save();
 }
-
-Widget PaddedText(
-    final String text, {
-      final TextAlign align = TextAlign.left,
-    }) =>
-    Padding(
-      padding: EdgeInsets.all(10),
-      child: Text(
-        text,
-        textAlign: align,
-      ),
-    );

@@ -15,7 +15,12 @@ class PdfPreviewPage extends StatelessWidget {
         title: Text('PDF Preview'),
       ),
       body: PdfPreview(
-        build: (context) => makePdf(invoice),
+        allowPrinting: false,
+        canChangeOrientation: false,
+        canChangePageFormat: false,
+        canDebug: false,
+       pdfFileName: 'bol-bol.pdf',
+        build: (context) => makePdf(),
       ),
     );
   }
